@@ -12,14 +12,72 @@ public class Game {
     private (int row, int col) enPassant = (-1, -1); // location of pawn that advanced two squares last move
     private Castling whiteCastle = Castling.Either, blackCastle = Castling.Either;
     private char whitePawnPromote = 'q', blackPawnPromote = 'Q';
+    
+    static string placeKingRooks(bool capitalized)
+    {
+        char[] outstring = "........".ToCharArray();
+
+        int king = 1 + (Random.Shared.Next() % 6);
+        outstring[king] = capitalized ? 'K' : 'k';
+
+        for (int i = 0; i < 2; i++)
+        {
+            int rook = 0;
+            if (i == 0)
+            {
+                rook = Random.Shared.Next() % king;
+            }
+            else
+            {
+                rook = king + (Random.Shared.Next() % (king - 7));
+            }
+                
+            outstring[rook] = capitalized ? 'R' : 'r';
+        }
+            
+        return outstring.ToString()!;
+    }
+        
+    static string placeBishops(bool capitalized, string kingrookstring)
+    {
+        int first = 2*(Random.Shared.Next()%4);
+        int second = 2*(Random.Shared.Next()%4)+1;
+        char bishopchar = capitalized ? 'C' : 'c';
+        char[] outstring = "........".ToCharArray();
+        outstring[first] = bishopchar; 
+        outstring[second] = bishopchar;
+        return outstring.ToString()!;
+    }
 
     public Game() {
         //       abcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefghabcdefgh
         var b = "RNBQKBNRPPPPPPPP................................pppppppprnbqkbnr";
         for (int r = 0, i = 0; r < 8; r++)
+        for (int c = 0; c < 8; c++)
+            board[r, c] = b[i++];
+    }
+    
+    public Game(bool notnormal)
+    {
+        
+        
+        if (notnormal)
+        {
+            
+            var b = "RNBQKBNRPPPPPPPP................................pppppppprnbqkbnr";
+            for (int r = 0, i = 0; r < 8; r++)
             for (int c = 0; c < 8; c++)
                 board[r, c] = b[i++];
+        }
+        else
+        {
+            var b = "RNBQKBNRPPPPPPPP................................pppppppprnbqkbnr";
+            for (int r = 0, i = 0; r < 8; r++)
+            for (int c = 0; c < 8; c++)
+                board[r, c] = b[i++];
+        }
     }
+    
 
     public Game(Game save) => Restore(save);
 

@@ -2,7 +2,8 @@
     private static readonly Random random = new(0);
 
     public static void Main(string[] args) {
-        var game = new Game();
+        Console.WriteLine("Press '9' for chess 960, press anything else for normal chess.");
+        var game = new Game(Console.ReadKey(true).KeyChar == '9');
         string lastWhiteCmd = "best4", lastBlackCmd = "best4";
         bool autoMode = false;
         for (;;) {

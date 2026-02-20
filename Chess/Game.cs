@@ -7,13 +7,13 @@ public class Game {
         Either = 3
     };
 
-    private readonly char[,] board = new char[8, 8];
+    public readonly char[,] board = new char[8, 8];
     public bool isWhiteTurn = true;
     private (int row, int col) enPassant = (-1, -1); // location of pawn that advanced two squares last move
     private Castling whiteCastle = Castling.Either, blackCastle = Castling.Either;
     private char whitePawnPromote = 'q', blackPawnPromote = 'Q';
     
-    static string placeKingRooks(bool capitalized)
+    public static string PlaceKingRooks(bool capitalized)
     {
         char[] outstring = "........".ToCharArray();
 
@@ -22,31 +22,64 @@ public class Game {
 
         for (int i = 0; i < 2; i++)
         {
-            int rook = 0;
+            int rook;
             if (i == 0)
             {
                 rook = Random.Shared.Next() % king;
             }
             else
             {
-                rook = king + (Random.Shared.Next() % (king - 7));
+                rook = king + 1 + (Random.Shared.Next() % (7-king));
             }
                 
             outstring[rook] = capitalized ? 'R' : 'r';
         }
             
-        return outstring.ToString()!;
+        return new string(outstring);
     }
         
-    static string placeBishops(bool capitalized, string kingrookstring)
+    public static string PlaceBishops(bool capitalized, string kingrookstring)
     {
-        int first = 2*(Random.Shared.Next()%4);
-        int second = 2*(Random.Shared.Next()%4)+1;
-        char bishopchar = capitalized ? 'C' : 'c';
-        char[] outstring = "........".ToCharArray();
-        outstring[first] = bishopchar; 
-        outstring[second] = bishopchar;
-        return outstring.ToString()!;
+        char[] outstring = kingrookstring.ToCharArray();
+
+        for (int i = 0; i < 2; i++)
+        {
+            int bishop = -1;
+            while (bishop == -1 || outstring[bishop] != '.')
+            {
+                bishop = 2 * (Random.Shared.Next() % 4) + i;
+            }
+            outstring[bishop] = capitalized ? 'B' : 'b';
+        }
+        
+        return new string(outstring);
+    }
+
+    public static string PlaceRest(bool capitalized, string bishopstring)
+    {
+        char[] outstring = bishopstring.ToCharArray();
+        
+        int placequeen = Random.Shared.Next() % 3;
+        int placements = 0;
+        for (int i = 0; i < outstring.Length; i++)
+        {
+            if (outstring[i] == '.')
+            {
+                if (placequeen == placements) outstring[i] = capitalized ? 'Q' : 'q';
+                else outstring[i] = capitalized ? 'N' : 'n';
+                placements++;
+            }
+        }
+
+        return new string(outstring);
+    }
+
+    public static string Chess960Row(bool capitalized)
+    {
+        string board = PlaceKingRooks(capitalized);
+        board = PlaceBishops(capitalized,board);
+        board = PlaceRest(capitalized,board);
+        return board;
     }
 
     public Game() {
@@ -57,13 +90,10 @@ public class Game {
             board[r, c] = b[i++];
     }
     
-    public Game(bool notnormal)
+    public Game(bool normal)
     {
-        
-        
-        if (notnormal)
+        if (normal)
         {
-            
             var b = "RNBQKBNRPPPPPPPP................................pppppppprnbqkbnr";
             for (int r = 0, i = 0; r < 8; r++)
             for (int c = 0; c < 8; c++)
@@ -71,7 +101,8 @@ public class Game {
         }
         else
         {
-            var b = "RNBQKBNRPPPPPPPP................................pppppppprnbqkbnr";
+            var row = Chess960Row(true);
+            var b = row + "PPPPPPPP................................pppppppp" + row.ToLower();
             for (int r = 0, i = 0; r < 8; r++)
             for (int c = 0; c < 8; c++)
                 board[r, c] = b[i++];
